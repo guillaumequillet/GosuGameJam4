@@ -1,51 +1,10 @@
 Gosu Game Jam 4 - Platformer
 
-1 - réaliser les maps sous Tiled : prévoir comme d'habitude un parser rapide pour ce faire
-2 - s'inspirer des excellentes collisions tuto game maker sur Udemy
-3 - trouver une mécanique originale
-4 - glisser un pingouin quelque part
+Already Implemented :
+- basic TILED map structure : must be handled better to load proper layers and to add triggers and background layers
+- basic platformer gameplay
 
-2 - collisions
-
-vitesse verticale x_speed
-right et left qui seront des valeurs égales à 1 ou -1 selon que la touche soit pressée ou non
-
-max_speed = 4
-x_speed = 0
-y_speed = 0
-acceleration = 1
-gravity_acceleration = 0.5
-jump_height = -9
-grab_width = 18
-
-case state
-when :moving
-  if (x_speed != 0)
-    image_xscale = sign(x_speed)
-  end
-
-  if (right or left)
-    x_speed += (right - left) * acceleration # right et left valent 0 ou 1 selon que la touche soit pressée ou non
-    x_speed = clamp(x_speed, -max_speed, max_speed)
-  else
-    apply_friction(acceleration)
-  end
-
-  move(o_solid)
-end
-
-def apply_friction(amount)
-  # if we're moving
-  if (x_speed != 0)
-    if (x_speed.abs - amount > 0)
-      x_speed -= amount * image_xscale
-    else
-      x_speed = 0
-    end
-  end
-end
-
-def move(collision_object)
-  x += x_speed
-  y += y_speed
-end
+TODO :
+- improve the tiled parser
+- add camera system to allow scrolling
+- define gameplay and create graphics
