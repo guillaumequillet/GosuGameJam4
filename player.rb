@@ -14,6 +14,8 @@ class Player
     @gravity_acceleration = 0.4
     @jump_height = -7
     @grab_width = 18
+    @edge_timer = Gosu.milliseconds
+    @edge_forgivness = 80
 
     @image_xscale = 1
 
@@ -70,9 +72,23 @@ class Player
     @y += @y_speed
   end
 
+  def jump
+    @y_speed = @jump_height
+    @new_jump = false
+    @edge_timer = Gosu.milliseconds
+  end
+
+  def jump_keys_ok?
+    space > 0 && @new_jump
+  end
+
   def button_down(id)
-    if on_floor? && (id == Gosu::KB_SPACE || id == Gosu::GP_0_BUTTON_0)
-      @new_jump = true
+    # SAUT pressé
+    if (id == Gosu::KB_SPACE || id == Gosu::GP_0_BUTTON_0)
+      # si au sol ou plus depuis très peu
+      if can_jump?
+        @new_jump = true
+      end
     end
   end
   
@@ -86,31 +102,44 @@ class Player
   def down; return Gosu.button_down?(Gosu::KB_DOWN) ? 1 : 0; end
   def space; return (Gosu.button_down?(Gosu::KB_SPACE) || Gosu.button_down?(Gosu::GP_0_BUTTON_0)) ? 1 : 0; end
 
+  def can_jump?
+    on_floor? || on_forgivness?
+  end
+
   def on_floor?
     @window.collision?(@x, @y + 1, @width, @height)
+  end
+
+  def on_forgivness?
+    Gosu.milliseconds - @edge_timer < @edge_forgivness
   end
 
   def update
     case @state
     when :moving
-      # vérifier si le perso est au sol, sinon appliquer la gravité
+      # le joueur est dans les airs
       if !(on_floor?)
         @y_speed += @gravity_acceleration
 
-        # le joueur est dans les airs
         # TODO : changer la frame
 
         # controler la hauteur du saut
         if (@y_speed < -6 && space == 0)
           @y_speed = -3
         end
-      else # le joueur est au sol
+
+        # code pour sauter (edge forgivness)
+        if (can_jump? && jump_keys_ok?)
+          jump
+        end
+      # le joueur est au sol
+      else
         @y_speed = 0
+        @edge_timer = Gosu.milliseconds # on stocke un timer 
 
         # code pour sauter
-        if (space > 0 && @new_jump)
-          @y_speed = @jump_height
-          @new_jump = false
+        if (jump_keys_ok?)
+          jump
         end
       end
 
@@ -135,5 +164,10 @@ class Player
     # @sprite ||= Gosu.render(@width, @height) {Gosu.draw_rect(0, 0, @width, @height, Gosu::Color.new(255, 255, 0 ,255))}
     @sprite ||= Gosu::Image.new('./gfx/player.png', retro: true)
     @sprite.draw_rot(@x, @y, @z, 0, 0.5, 0.5, @image_xscale)
+
+    @font ||= Gosu::Font.new(16)
+    if (!@jump_buffer_timer.nil?)
+      @font.draw_text("Jump buffer : #{Gosu.milliseconds - @jump_buffer_timer}", 5, 5, 2)
+    end
   end
 end
