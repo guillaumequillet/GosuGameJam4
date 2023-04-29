@@ -13,7 +13,6 @@ class Player
     @acceleration = 0.8
     @gravity_acceleration = 0.4
     @jump_height = -7
-    @grab_width = 18
     @edge_timer = Gosu.milliseconds
     @edge_forgivness = 80
 
@@ -21,6 +20,10 @@ class Player
 
     @states = [:moving] # sera complété plus tard
     @state = @states[0]
+
+    @right_keys = [Gosu::KB_RIGHT, Gosu::KB_D, Gosu::GP_0_RIGHT, Gosu::GP_0_RIGHT_STICK_X_AXIS]
+    @left_keys = [Gosu::KB_LEFT, Gosu::KB_A, Gosu::GP_0_LEFT, Gosu::GP_0_LEFT_STICK_X_AXIS]
+    @jump_keys = [Gosu::KB_SPACE, Gosu::GP_0_BUTTON_0]
   end
 
   def sign(value)
@@ -84,7 +87,7 @@ class Player
 
   def button_down(id)
     # SAUT pressé
-    if (id == Gosu::KB_SPACE || id == Gosu::GP_0_BUTTON_0)
+    if @jump_keys.include?(id)
       # si au sol ou plus depuis très peu
       if can_jump?
         @new_jump = true
@@ -96,11 +99,17 @@ class Player
 
   end
 
-  def right; return (Gosu.button_down?(Gosu::KB_RIGHT) || Gosu.button_down?(Gosu::GP_0_RIGHT) || Gosu.button_down?(Gosu::GP_0_RIGHT_STICK_X_AXIS)) ? 1 : 0; end
-  def left; return (Gosu.button_down?(Gosu::KB_LEFT) || Gosu.button_down?(Gosu::GP_0_LEFT) || Gosu.button_down?(Gosu::GP_0_LEFT_STICK_X_AXIS)) ? 1 : 0; end
-  def up; return Gosu.button_down?(Gosu::KB_UP) ? 1 : 0; end
-  def down; return Gosu.button_down?(Gosu::KB_DOWN) ? 1 : 0; end
-  def space; return (Gosu.button_down?(Gosu::KB_SPACE) || Gosu.button_down?(Gosu::GP_0_BUTTON_0)) ? 1 : 0; end
+  def right
+    return @right_keys.any? {|key| Gosu.button_down?(key)} ? 1 : 0
+  end
+
+  def left
+    return @left_keys.any? {|key| Gosu.button_down?(key)} ? 1 : 0
+  end
+
+  def space
+    return @jump_keys.any? {|key| Gosu.button_down?(key)} ? 1 : 0
+  end
 
   def can_jump?
     on_floor? || on_forgivness?
