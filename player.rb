@@ -1,4 +1,5 @@
 class Player
+  attr_reader :x, :y
   def initialize(window, x = 0, y = 0)
     @window = window 
     @width = 16

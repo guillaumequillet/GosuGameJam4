@@ -1,5 +1,6 @@
 require 'gosu'
 require_relative './player.rb'
+require_relative './camera.rb'
 require_relative './map.rb'
 
 class Window < Gosu::Window
@@ -28,16 +29,21 @@ class Window < Gosu::Window
   def reset
     @map = Map.new('test.tmj')
     @player = Player.new(self, 64, 96)
+    @camera = Camera.new(self)
+    @camera.set_target(@player)
   end
 
   def update
     @player.update
     @map.update
+    @camera.update
   end
 
   def draw
-    @player.draw
-    @map.draw
+    @camera.look do
+      @player.draw
+      @map.draw
+    end
   end
 end
 
