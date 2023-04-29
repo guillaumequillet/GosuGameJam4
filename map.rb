@@ -18,6 +18,14 @@ class Map
       x, y, w, h = block['x'], block['y'], block['width'], block['height']
       @blocks.push [x, y, w, h]
     end
+
+    # on charge les blocs de mort
+    @death_blocks = []
+    death_blocks_data = @layers[2]['objects']
+    death_blocks_data.each do |death_block|
+      x, y, w, h = death_block['x'], death_block['y'], death_block['width'], death_block['height']
+      @death_blocks.push [x, y, w, h]
+    end
   end
 
   def update
@@ -39,6 +47,17 @@ class Map
       next if y2 + h2 <= y # trop haut
       return true # il y a collision
     end
+
+    # si pas de collision, peut être avec un death block
+    @death_blocks.each do |block|
+      x, y, w, h = *block
+      next if x2 >= x + w # trop à droite
+      next if x2 + w2 <= x # trop à gauche
+      next if y2 >= y + h # trop bas
+      next if y2 + h2 <= y # trop haut
+      return :death # il y a collision
+    end
+
     return false # pas de collision
   end
 

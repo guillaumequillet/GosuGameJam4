@@ -13,12 +13,15 @@ class Camera
   def update
     if !@target.nil?
       wanted_x = -(@target.x - @window.width / 2)
-      @x = lerp(@x, wanted_x, 0.1)
+      @x = lerp(@x, wanted_x, 0.05)
 
       # lerp vers hauteur du personnage si le perso est au sol
       if @target.on_floor?
         wanted_height = -(@target.y - @window.height / 2)
         @y = lerp(@y, wanted_height, 0.05)
+      else
+        wanted_height = -(@target.y - @window.height / 2)
+        @y = lerp(@y, wanted_height, 0.2)
       end
     end
   end

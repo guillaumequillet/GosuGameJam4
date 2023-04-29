@@ -4,14 +4,11 @@ require_relative './camera.rb'
 require_relative './map.rb'
 
 class Window < Gosu::Window
+  attr_reader :map
   def initialize
     super(320, 240, true)
     self.caption = 'Gosu Game Jam 4 - Platformer'
     reset
-  end
-  
-  def collision?(x, y, w, h)
-    @map.collision?(x, y, w, h)
   end
   
   def button_down(id)

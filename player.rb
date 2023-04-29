@@ -19,8 +19,7 @@ class Player
 
     @image_xscale = 1
 
-    @states = [:moving] # sera complété plus tard
-    @state = @states[0]
+    @state = :moving # states are :moving, :dead
 
     @right_keys = [Gosu::KB_RIGHT, Gosu::KB_D, Gosu::GP_0_RIGHT, Gosu::GP_0_RIGHT_STICK_X_AXIS]
     @left_keys = [Gosu::KB_LEFT, Gosu::KB_A, Gosu::GP_0_LEFT, Gosu::GP_0_LEFT_STICK_X_AXIS]
@@ -54,10 +53,19 @@ class Player
     end
   end
 
+  def collision?(x, y, w, h)
+    collision = @window.map.collision?(x, y, w, h)
+    if collision == :death
+      @state = :dead
+    else
+      return collision
+    end
+  end
+
   def move
     # collisions horizontales
-    if (@window.collision?(@x + @x_speed, @y, @width, @height))
-      while (!@window.collision?(@x + sign(@x_speed), @y, @width, @height))
+    if (collision?(@x + @x_speed, @y, @width, @height))
+      while (!collision?(@x + sign(@x_speed), @y, @width, @height))
         @x += sign(@x_speed)
       end
       @x_speed = 0
@@ -66,8 +74,8 @@ class Player
     @x += @x_speed
 
     # collisions verticale
-    if (@window.collision?(@x, @y + @y_speed, @width, @height))
-      while (!@window.collision?(@x, @y + sign(@y_speed), @width, @height))
+    if (collision?(@x, @y + @y_speed, @width, @height))
+      while (!collision?(@x, @y + sign(@y_speed), @width, @height))
         @y += sign(@y_speed)
       end
       @y_speed = 0
@@ -117,7 +125,7 @@ class Player
   end
 
   def on_floor?
-    @window.collision?(@x, @y + 1, @width, @height)
+    collision?(@x, @y + 1, @width, @height)
   end
 
   def on_forgivness?
@@ -126,6 +134,9 @@ class Player
 
   def update
     case @state
+    when :dead
+      @x = -10
+      @y = -10
     when :moving
       # le joueur est dans les airs
       if !(on_floor?)
