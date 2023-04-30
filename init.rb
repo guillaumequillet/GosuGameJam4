@@ -6,7 +6,7 @@ require_relative './pickup.rb'
 require_relative './map.rb'
 
 class Window < Gosu::Window
-  attr_reader :map, :player
+  attr_reader :font, :map, :player
   def initialize
     super(320, 240, false)
     self.caption = 'Gosu Game Jam 4 - Platformer'
@@ -17,6 +17,10 @@ class Window < Gosu::Window
       game_over: Gosu::Image.new('./gfx/game_over_screen.png', retro: true),
       finished: Gosu::Image.new('./gfx/finished_screen.png', retro: true)
     }
+    @font = Gosu::Font.new(16, {
+      name: './gfx/rainyhearts.ttf',
+      retro: true
+    })
   end
   
   def button_down(id)
@@ -58,7 +62,7 @@ class Window < Gosu::Window
     @current_level = 0
     @score = 0
     @last_score = @score
-    @lives = 99
+    @lives = 5
     @state = :game
     reset
   end
@@ -92,23 +96,29 @@ class Window < Gosu::Window
     case @state
     when :title
       @backgrounds[:title].draw(0, 0, 0)
+      text = 'Press action button or space to start'
+      @font.draw_text(text, (self.width - @font.text_width(text)) / 2, (self.height - @font.height) / 2, 2)
+      @font.draw_text(text, (self.width - @font.text_width(text)) / 2 + 1, (self.height - @font.height) / 2 + 1, 1, 1, 1, Gosu::Color::BLACK)
     when :game
+      @map.draw_background
       @camera.look do
         @player.draw
         @map.draw
       end
 
-      @font ||= Gosu::Font.new(24)
-      @font.draw_text("Score : #@score", 10, 10, 1)
+      @font.draw_text("Score : #@score", 10, 10, 2)
+      @font.draw_text("Score : #@score", 10 + 1, 10 + 1, 1, 1, 1, Gosu::Color::BLACK)
 
       remaining_lives = "Lives : #@lives"
-      @font.draw_text(remaining_lives, self.width - @font.text_width(remaining_lives) - 10, self.height - @font.height, 1)
+      @font.draw_text(remaining_lives, self.width - @font.text_width(remaining_lives) - 10, self.height - @font.height, 2)
+      @font.draw_text(remaining_lives, self.width - @font.text_width(remaining_lives) - 10 + 1, self.height - @font.height + 1, 1, 1, 1, Gosu::Color::BLACK)
       
       @map.draw_hud
     when :game_over
       @backgrounds[:game_over].draw(0, 0, 0)
     when :finished
       @backgrounds[:finished].draw(0, 0, 0)
+      @font.draw_text("Score : #@score", 10, 180, 2, 3, 3)
     end
   end
 end

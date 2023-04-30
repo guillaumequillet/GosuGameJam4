@@ -63,10 +63,11 @@ class Map
     end
 
     @total_pickups = @pickups.size
-    @font = Gosu::Font.new(16)
+    @font = @window.font
   end
 
   def update
+    @pickups.each {|pickup| pickup.update}
     @enemies.each {|enemy| enemy.update(@window.player)}
   end
 
@@ -98,7 +99,7 @@ class Map
 
     # si pas de collision, peut être avec un ennemi
     @enemies.each do |enemy|
-      x, y, w, h = enemy.x * @tile_size, enemy.y * @tile_size, @tile_size, @tile_size
+      x, y, w, h = enemy.x * @tile_size + 4, enemy.y * @tile_size + 4, @tile_size - 8, @tile_size - 8
       next if x2 >= x + w # trop à droite
       next if x2 + w2 <= x # trop à gauche
       next if y2 >= y + h # trop bas
@@ -170,9 +171,17 @@ class Map
     draw_exit
   end
   
+  def draw_background
+    @background_color ||= Gosu::Color.new(255, 29, 43, 83)
+    Gosu.draw_rect(0, 0, @window.width, @window.height, @background_color)
+  end
+
   def draw_hud
     # HUD
+    @coin ||= Gosu::Image.new('./gfx/pickups/gem.png', retro: true)
+    @coin.draw(10, @window.height - 19, 1)
     collected = @total_pickups - @pickups.size
-    @font.draw_text("Collected : #{collected}/#@total_pickups", 10, @window.height - @font.height, 1)
+    @font.draw_text("#{collected}/#@total_pickups", 26, @window.height - @font.height, 2)
+    @font.draw_text("#{collected}/#@total_pickups", 26 + 1, @window.height - @font.height + 1, 1, 1, 1, Gosu::Color::BLACK)
   end
 end

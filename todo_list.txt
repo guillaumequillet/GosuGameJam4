@@ -8,3 +8,11 @@ TODO :
 - improve the tiled parser
 - add camera system to allow scrolling
 - define gameplay and create graphics
+
+Crédits
+dklon sound effects
+Fupi sound effects
+Ouren sound effects
+Camellina font
+Starborn font
+freepik
