@@ -35,6 +35,12 @@ class Player
       death: Gosu::Sample.new('./sfx/vgdeathsound.wav'),
       exit: Gosu::Sample.new('./sfx/vgmenuselect.wav')
     }
+
+    @sprite = Gosu::Image.load_tiles('./gfx/player.png', 16, 16, retro: true)
+    @sprite_id = 0
+    @sprite_duration = 100
+    @sprite_duration_running = 50
+    @sprite_tick = Gosu.milliseconds
   end
 
   def sign(value)
@@ -66,7 +72,7 @@ class Player
 
   def collision?(x, y, w, h)
     return false if @state != :moving
-    
+
     collision = @window.map.collision?(x, y, w, h)
     case collision
     when :death, :enemy
@@ -192,6 +198,16 @@ class Player
       # changer la direction du sprite
       if (@x_speed != 0)
         @image_xscale = sign(@x_speed)
+
+        sprite_duration = (@running_multiplier > 1) ? @sprite_duration_running : @sprite_duration
+
+        if Gosu.milliseconds - @sprite_tick >= sprite_duration
+          @sprite_id += 1
+          @sprite_id = 1 if @sprite_id > 2
+          @sprite_tick = Gosu.milliseconds 
+        end
+      else
+        @sprite_id = 0
       end
 
       # vérifier si gauche ou droite
@@ -208,7 +224,6 @@ class Player
   end
 
   def draw
-    @sprite ||= Gosu::Image.new('./gfx/player.png', retro: true)
-    @sprite.draw_rot(@x, @y, @z, 0, 0.5, 0.5, @image_xscale)
+    @sprite[@sprite_id].draw_rot(@x, @y, @z, 0, 0.5, 0.5, @image_xscale)
   end
 end
