@@ -65,14 +65,15 @@ class Player
   end
 
   def collision?(x, y, w, h)
+    return false if @state != :moving
+    
     collision = @window.map.collision?(x, y, w, h)
     case collision
     when :death, :enemy
-      unless @state == :dead
-        @sounds[:death].play
-        @state = :dead
-        @window.lose_life
-      end
+      @sounds[:death].play
+      @state = :dead
+      @window.lose_life
+      return false
     when :pickup
       if @window.map.pickups.size == 0
         @sounds[:last_pickup].play

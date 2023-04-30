@@ -18,7 +18,7 @@ class Enemy
     if Gosu.milliseconds - @frame_tick >= @frame_time
       @frame_tick = Gosu.milliseconds
       @frame = (@frame == 0) ? 1 : 0
-      @sound.play(0.3) if @frame == 1
+      @sound.play(0.5) if @frame == 1
     end
   end
 

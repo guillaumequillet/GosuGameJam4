@@ -21,6 +21,12 @@ class Window < Gosu::Window
       name: './gfx/rainyhearts.ttf',
       retro: true
     })
+
+    @song = Gosu::Song.new('./sfx/Jungle Groove Grove.ogg')
+    @song.volume = 0.3
+    @song.play
+
+    @validate_sound = Gosu::Sample.new('./sfx/vgmenuselect.wav')
   end
   
   def button_down(id)
@@ -29,6 +35,21 @@ class Window < Gosu::Window
 
     if defined?(@player)
       @player.button_down(id)
+    end
+
+    if @validate_keys.any? {|key| key == id}
+      case @state
+      when :title
+        @validate_sound.play
+        reset_game
+      when :game_over
+        @validate_sound.play
+        @state = :title
+      when :finished
+        @validate_sound.play
+        reset_game
+        @state = :title
+      end
     end
   end
 
@@ -39,6 +60,7 @@ class Window < Gosu::Window
       reset
     else
       # game is finished
+      @score += @lives * 10000 # 10000 for each remaining life
       @state = :finished
     end
   end
@@ -62,7 +84,7 @@ class Window < Gosu::Window
     @current_level = 0
     @score = 0
     @last_score = @score
-    @lives = 5
+    @lives = 1
     @state = :game
     reset
   end
@@ -73,22 +95,10 @@ class Window < Gosu::Window
 
   def update
     case @state
-    when :title
-      if @validate_keys.any? {|key| Gosu.button_down?(key)}
-        reset_game
-      end
     when :game
       @player.update
       @map.update
       @camera.update
-    when :game_over
-      if @validate_keys.any? {|key| Gosu.button_down?(key)}
-        reset_game
-      end      
-    when :finished
-      if @validate_keys.any? {|key| Gosu.button_down?(key)}
-        reset_game
-      end
     end
   end
 
@@ -118,6 +128,7 @@ class Window < Gosu::Window
       @backgrounds[:game_over].draw(0, 0, 0)
     when :finished
       @backgrounds[:finished].draw(0, 0, 0)
+      @font.draw_text("Score : #@score", 13, 183, 2, 3, 3, Gosu::Color::BLACK)
       @font.draw_text("Score : #@score", 10, 180, 2, 3, 3)
     end
   end
