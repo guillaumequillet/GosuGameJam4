@@ -21,12 +21,16 @@ Controller :
 
 ## Crédits
 ### sound effects
-dklon 
-Fupi 
-Ouren 
+dklon
+
+Fupi
+
+Ouren
+
 
 ### fonts
 Camellina font
+
 Starborn font
 
 ### background images
