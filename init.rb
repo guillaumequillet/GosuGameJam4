@@ -8,7 +8,7 @@ require_relative './map.rb'
 class Window < Gosu::Window
   attr_reader :font, :map, :player
   def initialize
-    super(320, 240, false)
+    super(320, 240, true)
     self.caption = 'Gosu Game Jam 4 - Platformer'
     @validate_keys = [Gosu::KB_SPACE, Gosu::GP_0_BUTTON_0]
     @state = :title
