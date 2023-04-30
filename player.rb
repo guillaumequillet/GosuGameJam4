@@ -38,8 +38,8 @@ class Player
 
     @sprite = Gosu::Image.load_tiles('./gfx/player.png', 16, 16, retro: true)
     @sprite_id = 0
-    @sprite_duration = 100
-    @sprite_duration_running = 50
+    @sprite_duration = 150
+    @sprite_duration_running = 100
     @sprite_tick = Gosu.milliseconds
   end
 

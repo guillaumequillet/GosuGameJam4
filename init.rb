@@ -24,7 +24,7 @@ class Window < Gosu::Window
 
     @song = Gosu::Song.new('./sfx/Jungle Groove Grove.ogg')
     @song.volume = 0.3
-    # @song.play
+    @song.play
 
     @validate_sound = Gosu::Sample.new('./sfx/vgmenuselect.wav')
   end
@@ -84,7 +84,7 @@ class Window < Gosu::Window
     @current_level = 0
     @score = 0
     @last_score = @score
-    @lives = 1
+    @lives = 3
     @state = :game
     reset
   end
