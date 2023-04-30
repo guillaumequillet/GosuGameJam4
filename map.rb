@@ -1,7 +1,9 @@
 require 'json'
 
 class Map
-  def initialize(filename)
+  attr_reader :start_x, :start_y, :pickups
+  def initialize(window, filename)
+    @window = window
     file = File.read("./maps/#{filename}")
     @data = JSON.parse(file)
     @layers = @data['layers']
@@ -26,10 +28,46 @@ class Map
       x, y, w, h = death_block['x'], death_block['y'], death_block['width'], death_block['height']
       @death_blocks.push [x, y, w, h]
     end
+
+    # on charge les ennemis
+    @enemies = []
+    enemies_data = @layers[3]['objects']
+    enemies_data.each do |enemy|
+      if (defined?(enemy['properties'][0]['value']))
+        type = enemy['properties'][0]['value']
+        x = (enemy['x'].to_i / @tile_size).floor
+        y = (enemy['y'].to_i / @tile_size).floor
+        @enemies.push Enemy.new(type, x, y, @tile_size)
+      end
+    end
+
+    # on charge les pickups
+    @pickups = []
+    pickups_data = @layers[4]['objects']
+    pickups_data.each do |pickup|
+      if (defined?(pickup['properties'][0]['value']))
+        type = pickup['properties'][0]['value']
+        x = (pickup['x'].to_i / @tile_size).floor
+        y = (pickup['y'].to_i / @tile_size).floor
+
+        if (type == 'start')
+          @start_x = (x + 0.5) * @tile_size
+          @start_y = (y + 0.5) * @tile_size
+        elsif (type == 'exit')
+          @exit_x = x * @tile_size
+          @exit_y = y * @tile_size
+        else
+          @pickups.push Pickup.new(type, x, y, @tile_size)
+        end
+      end
+    end
+
+    @total_pickups = @pickups.size
+    @font = Gosu::Font.new(16)
   end
 
   def update
-
+    @enemies.each {|enemy| enemy.update(@window.player)}
   end
 
   def collision?(x_sprite, y_sprite, w_sprite, h_sprite)
@@ -58,7 +96,52 @@ class Map
       return :death # il y a collision
     end
 
+    # si pas de collision, peut être avec un ennemi
+    @enemies.each do |enemy|
+      x, y, w, h = enemy.x * @tile_size, enemy.y * @tile_size, @tile_size, @tile_size
+      next if x2 >= x + w # trop à droite
+      next if x2 + w2 <= x # trop à gauche
+      next if y2 >= y + h # trop bas
+      next if y2 + h2 <= y # trop haut
+      return :enemy # il y a collision
+    end
+
+    # si pas de collision, peut être avec un Pickup
+    @pickups.each_with_index do |pickup, i|
+      x, y, w, h = pickup.x * @tile_size, pickup.y * @tile_size, @tile_size, @tile_size
+      next if x2 >= x + w # trop à droite
+      next if x2 + w2 <= x # trop à gauche
+      next if y2 >= y + h # trop bas
+      next if y2 + h2 <= y # trop haut
+
+      # on donne le bonus au joueur et on supprime
+      @window.validate_pickup(pickup)
+      @pickups.delete_at(i)
+
+      if pickup.type == 'exit'
+        return :exit
+      else
+        return :pickup # il y a collision
+      end
+    end
+
+    # sortie (si tout est ramassé) ?
+    if (@pickups.size == 0)
+      x, y, w, h = @exit_x, @exit_y, @tile_size, @tile_size
+      return false if x2 >= x + w # trop à droite
+      return false if x2 + w2 <= x # trop à gauche
+      return false if y2 >= y + h # trop bas
+      return false if y2 + h2 <= y # trop haut
+      return :exit # il y a collision
+    end
+
     return false # pas de collision
+  end
+
+  def draw_exit
+    @flags ||= Gosu::Image.load_tiles('./gfx/flags.png', @tile_size, @tile_size, retro: true)
+    frame = (@pickups.size == 0) ? 1 : 0
+    @flags[frame].draw(@exit_x, @exit_y, 0)
   end
 
   def draw
@@ -76,5 +159,20 @@ class Map
         end
       end
     end
+
+    # dessin des enemis
+    @enemies.each {|enemy| enemy.draw}
+
+    # dessin des pickups
+    @pickups.each {|pickup| pickup.draw}
+
+    # dessin sortie
+    draw_exit
+  end
+  
+  def draw_hud
+    # HUD
+    collected = @total_pickups - @pickups.size
+    @font.draw_text("Collected : #{collected}/#@total_pickups", 10, @window.height - @font.height, 1)
   end
 end
